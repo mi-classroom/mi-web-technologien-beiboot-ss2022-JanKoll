@@ -102,3 +102,8 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Ignore "Database"
+backend/data/
+
+.DS_store
