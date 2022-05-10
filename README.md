@@ -22,3 +22,6 @@ muss folgender Befehl im `root` Verzeichnis eingegeben werden:
 ```bash
 docker-compose up --build -d
 ```
+
+## Projekt im Web
+Die Anwendung kann unter http://beiboot.jankoll.de erreicht werden (redirect auf V-Host).
