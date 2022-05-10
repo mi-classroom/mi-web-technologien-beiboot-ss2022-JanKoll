@@ -5,8 +5,10 @@ import { oakCors } from "https://deno.land/x/cors/mod.ts";
 // Sorting
 import { SortService, ISortOptions, Direction } from "https://deno.land/x/sort@v1.1.1/mod.ts"
 
+// .env
+import { config } from "https://deno.land/x/dotenv/mod.ts";
 
-const data = await Deno.readTextFile("data/cda-paintings-2022-04-22.de.json");
+const data = await Deno.readTextFile(config().DATA_JSON);
 const bestData = JSON.stringify(getBestOf(data));
 const sortedBestData = sortByNumber(JSON.parse(bestData));
 
@@ -51,8 +53,8 @@ const app = new Application();
 app.use(oakCors()); // Enable CORS for All Routes
 app.use(router.routes());
 
-console.info("CORS-enabled web server listening on port 3000");
-await app.listen({ port: 3000 });
+console.info("CORS-enabled web server listening on port " + parseInt(config().PORT));
+await app.listen({ port: parseInt(config().PORT) });
 
 
 // import { serve } from "https://deno.land/std@0.138.0/http/server.ts";

@@ -2,14 +2,14 @@ version: "3.9"
 services:
   deno:
     build:
-      context: ./backend
+      context: ./server
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
     container_name: deno
   vue-ui:
     build:
-      context: ./frontend
+      context: ./client
       dockerfile: Dockerfile
     ports:
       - "8080:8080"

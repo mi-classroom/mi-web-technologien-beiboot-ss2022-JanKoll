@@ -13,6 +13,7 @@ import Card from '@/components/Card.vue'
 
 
 <script lang="ts">
+import { env } from '../env.js'
 
 export default {
   name: 'Home',
@@ -31,7 +32,7 @@ export default {
       const headers = {
         'Access-Control-Allow-Origin': '*',
       }
-      fetch('http://127.0.0.1:3000/', {
+      fetch(env.serverUrl, {
         mode: 'cors',
         headers,
         // method: 'GET'

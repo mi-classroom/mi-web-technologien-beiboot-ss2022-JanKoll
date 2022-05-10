@@ -3,7 +3,7 @@ FROM denoland/deno:1.21.2
 # The port that your application listens to.
 EXPOSE 3000
 
-WORKDIR /backend
+WORKDIR /server
 
 # Prefer not to run as root.
 USER deno
