@@ -7,14 +7,12 @@ import { calcSize }     from './utils/calcSize';
 import { fetchImages }  from './utils/fetchImages';
 
 import * as THREE from 'three';
-// import {CSS2DRenderer, CSS2DObject} from 'three/examples/jsm/renderers/CSS2DRenderer'
-
 
 const images = await fetchImages().then(data => {return data});
 
-
-// Three.js
-
+/* =======================================
+basic three.js setup
+======================================= */
 const app = document.querySelector<HTMLDivElement>('#app')!
 
 app.innerHTML = `
@@ -44,7 +42,9 @@ renderer.render(scene, camera);
 const ambientLight = new THREE.AmbientLight(0xffffff);
 scene.add(ambientLight);
 
-// resize
+/* =======================================
+window resize
+======================================= */
 window.addEventListener('resize', windowResize, false);
 
 function windowResize() {
@@ -54,15 +54,14 @@ function windowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// Generate Canvas
-
+/* =======================================
+generate canvas
+======================================= */
 function generate(data: any) {
 
   let positionX = -10;
   let positionZ = 10;
   let year = 0;
-  
-
 
   data.forEach((elm: any) => {
 
@@ -143,14 +142,24 @@ function generate(data: any) {
     positionX += CONFIG.maxHightWidthCube;
     positionZ -= CONFIG.maxHightWidthCube;
 
-    scene.add(painting, background);
+    const imgGroup = new THREE.Group();
+    imgGroup.add( painting );
+    imgGroup.add( background );
+
+    scene.add(imgGroup);
   });
 
 }
 
 generate(images)
 
-// Scroll Animation
+console.log(scene.children);
+
+
+/* =======================================
+scroll animation
+======================================= */
+document.body.onwheel = moveCamera;
 
 function moveCamera(event: any) {
   let scrollX = event.deltaY * -0.1;
@@ -160,78 +169,74 @@ function moveCamera(event: any) {
   camera.position.z += scrollZ;
 }
 
-document.body.onwheel = moveCamera;
-
-// Animation Loop
+/* =======================================
+animation loop
+======================================= */
+animate();
 
 function animate() {
   requestAnimationFrame(animate);
-
   renderer.render(scene, camera);
 }
 
-animate();
+/* =======================================
+mouse over
+======================================= */
 
-// mouse over
+var INTERSECTED: any, LASTINTERSECTED: any;
 
-let raycaster = new THREE.Raycaster();
-let mouse = new THREE.Vector2(1, 1);
+var raycaster = new THREE.Raycaster(); // create once
+var mouse = new THREE.Vector2(); // create once
 
-
-document.addEventListener('mousemove', onDocumentMouseMove, false);
+// when the mouse moves, call the given function
+document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 
 function onDocumentMouseMove(event: any) {
+	// the following line would stop any other event handler from firing
+	// (such as the mouse's TrackballControls)
+	// event.preventDefault();
+	
+	// update the mouse variable
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-  // the following line would stop any other event handler from firing
-  // (such as the mouse's TrackballControls)
-  event.preventDefault();
-
-  // update the mouse variable
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-
-  render()
+  imgHover();
 }
 
-
-let activeElm: any = undefined;
-
-function render() {
-
-  // update the picking ray with the camera and mouse position
-  raycaster.setFromCamera(mouse, camera);
-
-  // calculate objects intersecting the picking ray
+function imgHover() {
+	// find intersections
   var intersects = raycaster.intersectObjects(scene.children);
 
-  if (intersects.length > 0 && intersects[0].object.type === 'Mesh') {
+	// create a Ray with origin at the mouse position
+  raycaster.setFromCamera(mouse, camera);
 
-    const elmId = intersects[0].object.id;
-    const elm = scene.children.find((x: any) => x.id == elmId);
+	// if there is one (or more) intersections
+	if (intersects.length > 0) {
+		// if the closest object intersected is not the currently stored intersection object
+		if (intersects[0].object != INTERSECTED) {
+			// store parent (Object Group) as INTERSECTED
+			INTERSECTED = intersects[ 0 ].object.parent;
 
-    // console.log(elm);
+      // overwrite rotation form last INTERSECTED
+      if (LASTINTERSECTED && INTERSECTED != LASTINTERSECTED) {
+        LASTINTERSECTED.children[0].rotation.y = .25;
+        LASTINTERSECTED.children[1].rotation.y = .25;
+      }
 
+			LASTINTERSECTED = INTERSECTED
 
-    if (intersects[0].object.id === elm?.id) {
-      // elm.material.color.set(0xffff00);
-      elm.rotation.y = 0;
-      activeElm = elm;
+			// set rotation
+			INTERSECTED.children[0].rotation.y = 0;
+			INTERSECTED.children[1].rotation.y = 0;
+		}
+	} 
+	else {
+		// reset rotation on leaf
+		if (INTERSECTED) {
+      INTERSECTED.children[0].rotation.y = .25;
+      INTERSECTED.children[1].rotation.y = .25;
     }
-
-
-  } else {
-
-    if (activeElm) {
-      // activeElm.material.color.set(activeElm.userData);
-      activeElm.rotation.y = .25;
-
-    }
-
-  }
-
-  renderer.render(scene, camera);
+	
+		INTERSECTED = null;
+	}
 }
-
-
-
-
