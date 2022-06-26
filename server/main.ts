@@ -28,11 +28,35 @@ function mapImgData(img: any) {
     return {
         "title":            img.metadata.title,
         "preview":          img.images.overall.images[0].sizes.medium.src,
+        "size":             parseInfoInNumbers(img.metadata.additionalInfos, img.images.overall.images[0].sizes.medium.dimensions),
         "kind":             img.medium,
         "owner":            img.repository,
         "date":             img.metadata.date,
-        "sortingNumber":    img.sortingNumber
+        "sortingNumber":    img.sortingNumber,
+        "references":       img.references
+
     }    
+}
+
+function parseInfoInNumbers(info : string, pxSize : any) {
+    const regex = /[+-]?\d+(\,\d+)?/g;
+    const cmSize = String(info).match(regex)!.map(function(v : string) { return Math.abs(parseFloat(v.replace(',', '.'))); }).slice(0, 2);
+
+    if (cmSize[0] > cmSize[1] && pxSize.height > pxSize.width) {
+        return {
+            "cm":  {"height": cmSize[0],
+                    "width": cmSize[1]},
+            "px":  {"height": pxSize.height,
+                    "width": pxSize.width},
+        }
+    } else {
+        return {
+            "cm":  {"height": cmSize[1],
+                    "width": cmSize[0]},
+            "px":  {"height": pxSize.height,
+                    "width": pxSize.width},
+        }
+    }
 }
 
 function sortByNumber(images: any) {
