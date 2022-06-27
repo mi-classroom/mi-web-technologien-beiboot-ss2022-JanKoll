@@ -5,12 +5,12 @@ services:
       context: ./server
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3001:3001"
     container_name: deno
-  vue-ui:
-    build:
-      context: ./client
+  3d-client:
+    build: 
+      context: ./3d-client
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
-    container_name: vue-ui
+      - '3000:3000'
+    container_name: 3d-client

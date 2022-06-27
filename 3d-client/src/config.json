@@ -1,0 +1,6 @@
+{
+    "fetchURL": "http://127.0.0.1:3001",
+    "maxHightWidthCm": 400,
+    "maxHightWidthCube": 20,
+    "canvasDepth": 0.25
+}
