@@ -8,8 +8,6 @@ import { fetchImages }  from './utils/fetchImages';
 import { createYearLabel } from './utils/createYearLabel';
 
 import * as THREE from 'three';
-import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
-import { Group } from 'three';
 
 const images = await fetchImages().then(data => {return data});
 
@@ -17,6 +15,7 @@ const images = await fetchImages().then(data => {return data});
 basic three.js setup
 ======================================= */
 const app = document.querySelector<HTMLDivElement>('#app')!
+const appInfo = document.querySelector<HTMLDivElement>('#info')!
 
 app.innerHTML = `
   <canvas id="tour"></canvas>
@@ -80,7 +79,6 @@ function generate(data: any) {
     let imgProxy = elm.preview.replace('imageserver-2022', 'data-proxy/image.php?subpath=');
     let cubeColor = 0xFFFFFF;
 
-
     // Set Texture
     let paintingMaterial = [
       new THREE.MeshBasicMaterial({
@@ -111,7 +109,6 @@ function generate(data: any) {
     const painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
 
     // Generate Background
-
     const backgroundMaterial = new THREE.MeshBasicMaterial({ map: loader.load('../assets/stone-bg.jpg') });
     const backgroundGeometry = new THREE.BoxGeometry(CONFIG.maxHightWidthCube, CONFIG.maxHightWidthCube * 1.25, CONFIG.canvasDepth * 4);
     const background = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
@@ -124,7 +121,6 @@ function generate(data: any) {
     painting.position.y = 10;
 
     painting.position.x = positionX + CONFIG.maxHightWidthCube;
-
     painting.position.z = positionZ - CONFIG.maxHightWidthCube;
 
 
@@ -133,7 +129,6 @@ function generate(data: any) {
     background.position.y = 10;
 
     background.position.x = (positionX + CONFIG.maxHightWidthCube);
-
     background.position.z = (positionZ - CONFIG.maxHightWidthCube) - CONFIG.canvasDepth * 2;
 
     // Calc Positon for next entrey
@@ -144,7 +139,7 @@ function generate(data: any) {
     imgGroup.add( painting );
     imgGroup.add( background );
 
-
+    // Add Year if counter goes up
     if (imgDate[0] > year) {
       year = imgDate[0];
 
@@ -185,8 +180,8 @@ function animate() {
 /* =======================================
 mouse over
 ======================================= */
-let raycaster = new THREE.Raycaster(); // create once
-let mouse = new THREE.Vector2(); // create once
+let raycaster = new THREE.Raycaster(); 
+let mouse = new THREE.Vector2();
 
 // when the mouse moves, call the given function
 document.addEventListener( 'mousemove', onDocumentMouseMove, false );
@@ -241,6 +236,18 @@ function imgHover() {
 			// set rotation
 			INTERSECTED.children[0].rotation.y = 0;
 			INTERSECTED.children[1].rotation.y = 0;
+
+      let imgData = INTERSECTED.children[0].userData;
+      
+      // drwar info
+      appInfo.innerHTML = `
+        <div>
+          <h2>${imgData.title} (${imgData.date})</h2>
+          <p><b>Artist: </b>${imgData.artist}</p>
+          <p><b>Owner: </b>${imgData.owner}</p>
+          <p><b>Kind: </b>${imgData.kind.replace(/\s\[.*?\]/g, '').replace(/\s\(.*?\)/g, '')}</p>
+        </div>
+      `
 		}
 	} 
 	else {
@@ -249,6 +256,9 @@ function imgHover() {
       INTERSECTED.children[0].rotation.y = .25;
       INTERSECTED.children[1].rotation.y = .25;
     }
+
+    // delete info
+    appInfo.innerHTML = ""
 	
 		INTERSECTED = null;
 	}

@@ -1,12 +1,33 @@
-/* #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-} */
+/*
+Colors
+$medium: #666;
+$dark: #444;
+$darker: #222;
+$darkest: #000;
+$light: #b4b4b4;
+$lighter: #f2f2f2;
+$lightest:#fff;
+$lighten: rgba(255, 255, 255, 0.06);
+$lighten-strong: rgba(255, 255, 255, 0.2);
+$accent: #fc0;
+$accent-dark: #e8a60c;
+$error: #c00;
+$darken: rgba(0, 0, 0, 0.06);
+$darken-medium: rgba(0, 0, 0, 0.1);
+$darken-strong: rgba(0, 0, 0, 0.6);
+$darken-strongest: rgba(0, 0, 0, 0.8);
+*/
 
+* {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+@font-face {
+  font-family: IBMPlex;
+  src: url(../assets/fonts/IBMPlexSans-Regular.ttf);
+}
 
 canvas {
   position: fixed;
@@ -14,10 +35,27 @@ canvas {
   left: 0;
 }
 
-
 .label {
   color: #FFF;
-  font-family: sans-serif;
-  padding: 2px;
-  background: rgba( 0, 0, 0, .6 );
+  /* padding: 2px; */
+}
+
+#info div {
+  color: #444;
+  background: #f2f2f2;
+  position: absolute;
+  right: 0;
+  bottom: 1rem;
+  font-family: IBMPlex;
+  padding: 1rem .5rem;
+  max-width: 40rem;
+  width: 100%;
+}
+
+#info div h2 {
+  margin-bottom: .5rem;
+}
+
+#info div p:not(:last-child) {
+  margin-bottom: .25rem;
 }

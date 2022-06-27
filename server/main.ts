@@ -31,6 +31,7 @@ function mapImgData(img: any) {
         "size":             parseInfoInNumbers(img.metadata.additionalInfos, img.images.overall.images[0].sizes.medium.dimensions),
         "kind":             img.medium,
         "owner":            img.repository,
+        "artist":           img.involvedPersons[0].name,
         "date":             img.metadata.date,
         "sortingNumber":    img.sortingNumber,
         "references":       img.references
