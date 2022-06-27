@@ -13,3 +13,11 @@ canvas {
   top: 0;
   left: 0;
 }
+
+
+.label {
+  color: #FFF;
+  font-family: sans-serif;
+  padding: 2px;
+  background: rgba( 0, 0, 0, .6 );
+}

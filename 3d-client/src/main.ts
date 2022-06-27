@@ -5,8 +5,11 @@ import CONFIG from './config.json'
 // Call Util Functions
 import { calcSize }     from './utils/calcSize';
 import { fetchImages }  from './utils/fetchImages';
+import { createYearLabel } from './utils/createYearLabel';
 
 import * as THREE from 'three';
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { Group } from 'three';
 
 const images = await fetchImages().then(data => {return data});
 
@@ -50,13 +53,17 @@ window.addEventListener('resize', windowResize, false);
 function windowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-
+  
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 /* =======================================
 generate canvas
 ======================================= */
+let labelRenderer: any;
+
+generate(images);
+
 function generate(data: any) {
 
   let positionX = -10;
@@ -66,16 +73,8 @@ function generate(data: any) {
   data.forEach((elm: any) => {
 
     // set year
-
     const regex = /[+-]?\d+(\,\d+)?/g;
     const imgDate = String(elm.date).match(regex)!.map(function(v : string) { return Math.abs(parseInt(v)); }).slice(0, 1);
-
-    if (imgDate[0] > year) {
-      year = imgDate[0];
-      // console.log(year);
-    }
-
-    // console.log(elm.date, elm.sortingNumber)
 
     // Sanatize Proxy Img String
     let imgProxy = elm.preview.replace('imageserver-2022', 'data-proxy/image.php?subpath=');
@@ -83,7 +82,7 @@ function generate(data: any) {
 
 
     // Set Texture
-    var paintingMaterial = [
+    let paintingMaterial = [
       new THREE.MeshBasicMaterial({
         color: cubeColor //left
       }),
@@ -105,7 +104,6 @@ function generate(data: any) {
     ];
 
     let boxSize = calcSize(elm.size);
-
 
     // Generate Painting
     // BoxGeometry expects width, height, depht
@@ -146,15 +144,20 @@ function generate(data: any) {
     imgGroup.add( painting );
     imgGroup.add( background );
 
+
+    if (imgDate[0] > year) {
+      year = imgDate[0];
+
+      // Add Year Label
+      let label = createYearLabel(`${year}`, { fontsize: 25 });
+      label.position.set(positionX + 12, -5, positionZ + 2);
+      scene.add(label);
+    }
+
     scene.add(imgGroup);
   });
 
 }
-
-generate(images)
-
-console.log(scene.children);
-
 
 /* =======================================
 scroll animation
@@ -182,11 +185,8 @@ function animate() {
 /* =======================================
 mouse over
 ======================================= */
-
-var INTERSECTED: any, LASTINTERSECTED: any;
-
-var raycaster = new THREE.Raycaster(); // create once
-var mouse = new THREE.Vector2(); // create once
+let raycaster = new THREE.Raycaster(); // create once
+let mouse = new THREE.Vector2(); // create once
 
 // when the mouse moves, call the given function
 document.addEventListener( 'mousemove', onDocumentMouseMove, false );
@@ -196,22 +196,35 @@ function onDocumentMouseMove(event: any) {
 	// (such as the mouse's TrackballControls)
 	// event.preventDefault();
 	
-	// update the mouse variable
+	// update the mouse letiable
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
   imgHover();
 }
 
+/* =======================================
+image rotation
+======================================= */
+let INTERSECTED: any, LASTINTERSECTED: any;
+
 function imgHover() {
 	// find intersections
-  var intersects = raycaster.intersectObjects(scene.children);
+  let img = scene.children.filter(elm => {
+    if (elm.constructor.name === 'Group') 
+      return elm
+  });
+  
+  let intersects = raycaster.intersectObjects(img);
+  
+  // intersects = intersects.map(elm => elm.splice(-1, 1))
 
 	// create a Ray with origin at the mouse position
   raycaster.setFromCamera(mouse, camera);
 
 	// if there is one (or more) intersections
 	if (intersects.length > 0) {
+
 		// if the closest object intersected is not the currently stored intersection object
 		if (intersects[0].object != INTERSECTED) {
 			// store parent (Object Group) as INTERSECTED
