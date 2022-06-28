@@ -28,7 +28,7 @@ function mapImgData(img: any) {
     return {
         "title":            img.metadata.title,
         "preview":          img.images.overall.images[0].sizes.medium.src,
-        "size":             parseInfoInNumbers(img.metadata.additionalInfos, img.images.overall.images[0].sizes.medium.dimensions),
+        "size":             parseInfoInNumbers(img.dimensions, img.images.overall.images[0].sizes.medium.dimensions, img.metadata.title),
         "kind":             img.medium,
         "owner":            img.repository,
         "artist":           img.involvedPersons[0].name,
@@ -39,25 +39,33 @@ function mapImgData(img: any) {
     }    
 }
 
-function parseInfoInNumbers(info : string, pxSize : any) {
+function parseInfoInNumbers(info : string, pxSize : any, title : any) {
     const regex = /[+-]?\d+(\,\d+)?/g;
-    const cmSize = String(info).match(regex)!.map(function(v : string) { return Math.abs(parseFloat(v.replace(',', '.'))); }).slice(0, 2);
+    // let infoClean = info.replace('00e4', 'TEST').replace('00c4', '').replace('00fc', '').replace('00dc', '').replace('00f6', '').replace('00d6', '').replace('00df', '')
+    // let infoClean : any;
 
-    if (cmSize[0] > cmSize[1] && pxSize.height > pxSize.width) {
+    if (info.includes("Rahmen:")) {
+        return returnInfo(info.match(/Rahmen:.*/gi)![0]);
+        // infoClean.split('Rahmen:')[1]
+    } else {
+        return returnInfo(info);
+    }
+    // console.log(infoClean);
+    
+    function returnInfo(infoClean : any) {
+
+        let cmSize = String(infoClean).match(regex)!.map(function(v : string) { return Math.abs(parseFloat(v.replace(',', '.'))); }).slice(0, 2);
+
+        console.log({"title": title, "info": info, "infoClear": infoClean, "cm": cmSize});
+        
         return {
             "cm":  {"height": cmSize[0],
                     "width": cmSize[1]},
             "px":  {"height": pxSize.height,
                     "width": pxSize.width},
         }
-    } else {
-        return {
-            "cm":  {"height": cmSize[1],
-                    "width": cmSize[0]},
-            "px":  {"height": pxSize.height,
-                    "width": pxSize.width},
-        }
     }
+
 }
 
 function sortByNumber(images: any) {
