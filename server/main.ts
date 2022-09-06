@@ -40,23 +40,42 @@ function mapImgData(img: any) {
 }
 
 function parseInfoInNumbers(info : string, pxSize : any, title : any) {
-    const regex = /[+-]?\d+(\,\d+)?/g;
-    // let infoClean = info.replace('00e4', 'TEST').replace('00c4', '').replace('00fc', '').replace('00dc', '').replace('00f6', '').replace('00d6', '').replace('00df', '')
-    // let infoClean : any;
 
-    if (info.includes("Rahmen:")) {
-        return returnInfo(info.match(/Rahmen:.*/gi)![0]);
-        // infoClean.split('Rahmen:')[1]
+    
+
+    const regex = /[+-]?\d+(\,\d+)?/g;
+
+    if (info.includes("Durchmesser")) {
+        let cmDiameter = String(info).match(regex)!.map(function(v : string) { return Math.abs(parseFloat(v.replace(',', '.'))); }).slice(0, 1);
+
+        let pxDiameter = Math.sqrt((Math.pow(pxSize.height, 2) + Math.pow(pxSize.width, 2)));
+        
+        let alpha = Math.asin(pxSize.height / pxDiameter);
+        // let beta = 90 - alpha;
+
+        let cmHeight = cmDiameter[0] * Math.sin(alpha);
+        let cmWidth = Math.sqrt((- Math.pow(cmHeight, 2) + Math.pow(cmDiameter[0], 2)));
+
+
+        console.log("cmHeight " + cmHeight);
+        console.log("cmWidth " + cmWidth);
+
+        return returnInfo(`${String(cmHeight).replace('.', ',')} ${String(cmWidth).replace('.', ',')} cm`);
+    // } else if (info.includes("Maße mit Rahmen:")) {
+    //     console.log(title);
+    //     console.log(JSON.stringify(pxSize));
+        
+    //     console.log(info);
+    //     console.log("=============");
+    //     console.log();
+    //     return returnInfo(info);
+        
     } else {
         return returnInfo(info);
     }
-    // console.log(infoClean);
     
     function returnInfo(infoClean : any) {
-
         let cmSize = String(infoClean).match(regex)!.map(function(v : string) { return Math.abs(parseFloat(v.replace(',', '.'))); }).slice(0, 2);
-
-        console.log({"title": title, "info": info, "infoClear": infoClean, "cm": cmSize});
         
         return {
             "cm":  {"height": cmSize[0],
