@@ -11,6 +11,9 @@ import * as THREE from 'three';
 
 const images = await fetchImages().then(data => {return data});
 
+console.log(images);
+
+
 /* =======================================
 basic three.js setup
 ======================================= */

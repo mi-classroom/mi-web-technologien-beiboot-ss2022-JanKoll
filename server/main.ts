@@ -28,7 +28,7 @@ function mapImgData(img: any) {
     return {
         "title":            img.metadata.title,
         "preview":          img.images.overall.images[0].sizes.medium.src,
-        "size":             parseInfoInNumbers(img.metadata.additionalInfos, img.images.overall.images[0].sizes.medium.dimensions),
+        "size":             parseInfoInNumbers(img.dimensions, img.images.overall.images[0].sizes.medium.dimensions, img.metadata.title),
         "kind":             img.medium,
         "owner":            img.repository,
         "artist":           img.involvedPersons[0].name,
@@ -39,25 +39,52 @@ function mapImgData(img: any) {
     }    
 }
 
-function parseInfoInNumbers(info : string, pxSize : any) {
-    const regex = /[+-]?\d+(\,\d+)?/g;
-    const cmSize = String(info).match(regex)!.map(function(v : string) { return Math.abs(parseFloat(v.replace(',', '.'))); }).slice(0, 2);
+function parseInfoInNumbers(info : string, pxSize : any, title : any) {
 
-    if (cmSize[0] > cmSize[1] && pxSize.height > pxSize.width) {
+    
+
+    const regex = /[+-]?\d+(\,\d+)?/g;
+
+    if (info.includes("Durchmesser")) {
+        let cmDiameter = String(info).match(regex)!.map(function(v : string) { return Math.abs(parseFloat(v.replace(',', '.'))); }).slice(0, 1);
+
+        let pxDiameter = Math.sqrt((Math.pow(pxSize.height, 2) + Math.pow(pxSize.width, 2)));
+        
+        let alpha = Math.asin(pxSize.height / pxDiameter);
+        // let beta = 90 - alpha;
+
+        let cmHeight = cmDiameter[0] * Math.sin(alpha);
+        let cmWidth = Math.sqrt((- Math.pow(cmHeight, 2) + Math.pow(cmDiameter[0], 2)));
+
+
+        console.log("cmHeight " + cmHeight);
+        console.log("cmWidth " + cmWidth);
+
+        return returnInfo(`${String(cmHeight).replace('.', ',')} ${String(cmWidth).replace('.', ',')} cm`);
+    // } else if (info.includes("Maße mit Rahmen:")) {
+    //     console.log(title);
+    //     console.log(JSON.stringify(pxSize));
+        
+    //     console.log(info);
+    //     console.log("=============");
+    //     console.log();
+    //     return returnInfo(info);
+        
+    } else {
+        return returnInfo(info);
+    }
+    
+    function returnInfo(infoClean : any) {
+        let cmSize = String(infoClean).match(regex)!.map(function(v : string) { return Math.abs(parseFloat(v.replace(',', '.'))); }).slice(0, 2);
+        
         return {
             "cm":  {"height": cmSize[0],
                     "width": cmSize[1]},
             "px":  {"height": pxSize.height,
                     "width": pxSize.width},
         }
-    } else {
-        return {
-            "cm":  {"height": cmSize[1],
-                    "width": cmSize[0]},
-            "px":  {"height": pxSize.height,
-                    "width": pxSize.width},
-        }
     }
+
 }
 
 function sortByNumber(images: any) {
