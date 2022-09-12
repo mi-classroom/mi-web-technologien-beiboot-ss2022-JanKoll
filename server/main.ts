@@ -35,7 +35,6 @@ function mapImgData(img: any) {
         "date":             img.metadata.date,
         "sortingNumber":    img.sortingNumber,
         "references":       img.references
-
     }    
 }
 
@@ -56,10 +55,6 @@ function parseInfoInNumbers(info : string, pxSize : any, title : any) {
         let cmHeight = cmDiameter[0] * Math.sin(alpha);
         let cmWidth = Math.sqrt((- Math.pow(cmHeight, 2) + Math.pow(cmDiameter[0], 2)));
 
-
-        console.log("cmHeight " + cmHeight);
-        console.log("cmWidth " + cmWidth);
-
         return returnInfo(`${String(cmHeight).replace('.', ',')} ${String(cmWidth).replace('.', ',')} cm`);
     // } else if (info.includes("Maße mit Rahmen:")) {
     //     console.log(title);
@@ -69,7 +64,6 @@ function parseInfoInNumbers(info : string, pxSize : any, title : any) {
     //     console.log("=============");
     //     console.log();
     //     return returnInfo(info);
-        
     } else {
         return returnInfo(info);
     }
@@ -97,8 +91,28 @@ function sortByNumber(images: any) {
 
 const router = new Router();
 router
-  .get("/", async (context: any) => {
+  .get("/bestof", async (context: any) => {
     context.response.body = sortedBestData;
+  })
+  .get("/find/:id", async (context: any) => {
+    let found : any = [];
+
+    JSON.parse(data).items.find((img: any) => {
+
+        let ids = context?.params?.id.split('&');
+
+        ids.forEach((id: any) => {
+            if (img.metadata.id.includes(id)) {
+                found.push(mapImgData(img));
+            }
+        });
+    });
+
+    if (found.length > 0) {
+        context.response.body = found;
+    } else {
+        context.response.body = "Not found";
+    }
   })
 
 const app = new Application();
@@ -107,16 +121,3 @@ app.use(router.routes());
 
 console.info("CORS-enabled web server listening on port " + parseInt(config().PORT));
 await app.listen({ port: parseInt(config().PORT) });
-
-
-// import { serve } from "https://deno.land/std@0.138.0/http/server.ts";
-
-// function handler(req: Request): Response {
-//     return new Response(bestData, {headers: {
-//           'Access-Control-Allow-Origin': '*'
-//         }});
-//     // return new Response(document)
-//   }
-
-// // To listen on port 4242.
-// serve(handler, { port: 3000 });
