@@ -11,6 +11,9 @@ import * as THREE from 'three';
 
 const images = await fetchImages().then(data => {return data});
 
+// Possiont of last Group Background
+let lastPosX : number;
+
 console.log(images);
 
 
@@ -62,11 +65,10 @@ function windowResize() {
 /* =======================================
 generate canvas
 ======================================= */
-let labelRenderer: any;
 
-generate(images);
+generateGallery(images);
 
-function generate(data: any) {
+function generateGallery(data: any) {
 
   let positionX = -10;
   let positionZ = 10;
@@ -112,7 +114,9 @@ function generate(data: any) {
     const painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
 
     // Generate Background
-    const backgroundMaterial = new THREE.MeshBasicMaterial({ map: loader.load('../assets/stone-bg.jpg') });
+    let backgroundMaterial = new THREE.MeshBasicMaterial({ map: loader.load('../assets/stone-bg.jpg')});
+    if (elm.references.length > 0)
+      backgroundMaterial = new THREE.MeshBasicMaterial({ map: loader.load('../assets/stone-bg.jpg'), color: 0x95a5a6 })
     const backgroundGeometry = new THREE.BoxGeometry(CONFIG.maxHightWidthCube, CONFIG.maxHightWidthCube * 1.25, CONFIG.canvasDepth * 4);
     const background = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
 
@@ -126,13 +130,15 @@ function generate(data: any) {
     painting.position.x = positionX + CONFIG.maxHightWidthCube;
     painting.position.z = positionZ - CONFIG.maxHightWidthCube;
 
-
     // Set Backgournd
     background.rotation.y += 0.25;
     background.position.y = 10;
 
     background.position.x = (positionX + CONFIG.maxHightWidthCube);
     background.position.z = (positionZ - CONFIG.maxHightWidthCube) - CONFIG.canvasDepth * 2;
+
+    // set posion for last background
+    lastPosX = background.position.x;
 
     // Calc Positon for next entrey
     positionX += CONFIG.maxHightWidthCube;
@@ -162,12 +168,17 @@ scroll animation
 ======================================= */
 document.body.onwheel = moveCamera;
 
+camera.position.x = 13;
+camera.position.z = 12;
+
 function moveCamera(event: any) {
   let scrollX = event.deltaY * -0.1;
   let scrollZ = event.deltaY * 0.1;
 
-  camera.position.x += scrollX;
-  camera.position.z += scrollZ;
+  if (camera.position.x + scrollX > 0 && camera.position.x + scrollX < lastPosX+10) {
+    camera.position.x += scrollX;
+    camera.position.z += scrollZ;
+  }
 }
 
 /* =======================================
@@ -265,4 +276,41 @@ function imgHover() {
 	
 		INTERSECTED = null;
 	}
+}
+
+/* =======================================
+on click references
+======================================= */
+document.addEventListener( 'click', onDocumentClick, false );
+
+function onDocumentClick(event: any) {
+	// the following line would stop any other event handler from firing
+	// (such as the mouse's TrackballControls)
+	// event.preventDefault();
+	
+	// update the mouse letiable
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+
+	// find intersections
+  let img = scene.children.filter(elm => {
+    if (elm.constructor.name === 'Group') 
+      return elm
+  });
+  
+  let intersects = raycaster.intersectObjects(img);
+  
+  if (intersects.length == 0) {
+    camera.position.y = 10;
+  } else if (intersects[0].object.parent?.children[0].userData.references.length > 0) {
+    camera.position.y = 30;
+    console.log(intersects[0]);
+    
+  } else {
+    camera.position.y = 10;
+  }
+
+  
+  
 }
