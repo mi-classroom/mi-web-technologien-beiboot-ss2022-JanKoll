@@ -40,6 +40,10 @@ canvas {
   /* padding: 2px; */
 }
 
+#info hr {
+  margin: .5rem 0;
+}
+
 #info div {
   color: #444;
   background: #f2f2f2;

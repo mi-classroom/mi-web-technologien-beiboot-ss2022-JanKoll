@@ -34,7 +34,8 @@ function mapImgData(img: any) {
         "artist":           img.involvedPersons[0].name,
         "date":             img.metadata.date,
         "sortingNumber":    img.sortingNumber,
-        "references":       img.references
+        "references":       img.references,
+        "inventoryNumber":  img.inventoryNumber
     }    
 }
 

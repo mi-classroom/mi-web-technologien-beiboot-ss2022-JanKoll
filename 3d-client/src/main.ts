@@ -88,18 +88,11 @@ function generateGallery(data: any) {
 async function generateReference(ids: any, position: any) {
   const data = await fetchImages(ids).then(data => {return data});
 
-  console.log(position);
-  
-
   let positionX = position.x - CONFIG.maxHightWidthCube;
   let positionY = 40;
   let positionZ = position.z + CONFIG.maxHightWidthCube;
   
   data.forEach((elm: any) => {
-    
-    // console.log(elm);
-    
-
     generatePlane(elm, positionX, positionY, positionZ, false, true);
     
     // Calc Positon for next entrey
@@ -306,6 +299,8 @@ function imgHover() {
           <p><b>Artist: </b>${imgData.artist}</p>
           <p><b>Owner: </b>${imgData.owner}</p>
           <p><b>Kind: </b>${imgData.kind.replace(/\s\[.*?\]/g, '').replace(/\s\(.*?\)/g, '')}</p>
+          <hr/>
+          <p><i><b>Right click</b> on an image reveals it in the digital archive</i></p>
         </div>
       `
 		}
@@ -325,20 +320,11 @@ function imgHover() {
 }
 
 /* =======================================
-on click references
+on left click references
 ======================================= */
-document.addEventListener( 'click', onDocumentClick, false );
+document.addEventListener( 'click', onDocumentLeftClick, false );
 
-function onDocumentClick(event: any) {
-	// the following line would stop any other event handler from firing
-	// (such as the mouse's TrackballControls)
-	// event.preventDefault();
-	
-	// update the mouse letiable
-	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-
+function onDocumentLeftClick(event: any) {
 	// find intersections
   let img = scene.children.filter(elm => {
     if (elm.constructor.name === 'Group') 
@@ -374,12 +360,33 @@ function onDocumentClick(event: any) {
     });
 
     camera.position.y = 40;
-    generateReference(referencesIds, intersects[0].object.parent?.children[0].position);
-
-    console.log(intersects[0].object.parent?.children[0].position);
-    
+    generateReference(referencesIds, intersects[0].object.parent?.children[0].position);    
   } else {
     destroyReferences();
     camera.position.y = 10;
   }
+}
+
+/* =======================================
+on right click references
+======================================= */
+document.addEventListener( 'contextmenu', onDocumentRightClick, false );
+
+function onDocumentRightClick(event: any) {
+  // Prevent the browser's context menu from appearing
+  if(event.preventDefault != undefined)
+    event.preventDefault();
+  if(event.stopPropagation != undefined)
+    event.stopPropagation();
+
+	// find intersections
+  let img = scene.children.filter(elm => {
+    if (elm.constructor.name === 'Group') 
+      return elm
+  });
+  
+  let intersects = raycaster.intersectObjects(img);
+
+  if (!(Object.keys(intersects).length === 0) && intersects.length > 0)
+    window.open(`${CONFIG.cranachURL}${intersects[0].object.parent?.children[0].userData.inventoryNumber}`, '_blank')?.focus();
 }
