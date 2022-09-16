@@ -207,18 +207,49 @@ scroll animation
 ======================================= */
 document.body.onwheel = moveCamera;
 
-camera.position.x = 13;
-camera.position.z = 12;
+let cameraXStart = 13;
+let cameraZStart = 12;
+
+camera.position.x = cameraXStart;
+camera.position.z = cameraZStart;
 
 function moveCamera(event: any) {
   let scrollX = event.deltaY * -0.1;
   let scrollZ = event.deltaY * 0.1;
 
   if (camera.position.x + scrollX > 0 && camera.position.x + scrollX < LASTPOSX+10) {
-    camera.position.x += scrollX;
-    camera.position.z += scrollZ;
+    updateCameraScrollPosition(camera.position.x + scrollX, camera.position.z + scrollZ);
+    updateSliderMarker(camera.position.x);
   }
 }
+
+let slider = document.getElementById("yearslider");
+console.log(document.getElementById("yearslider")?.max);
+
+// // Update the current slider value (each time you drag the slider handle)
+slider?.addEventListener("input", moveSlider);
+
+function moveSlider(this : any) {
+  if (slider != undefined) {
+    slider.max = LASTPOSX*10 - 100;
+  }
+
+  camera.position.x = cameraZStart + this.value * 0.1;
+  camera.position.z = cameraZStart + (this.value * -0.1);
+}
+
+function updateSliderMarker(value : number) {
+  if (slider != undefined) {
+    slider.max = LASTPOSX * 10 - 100;
+    slider.value = value * 10;
+  }
+}
+
+function updateCameraScrollPosition(X : number, Z : number) {
+  camera.position.x = X;
+  camera.position.z = Z;
+}
+
 
 /* =======================================
 animation loop
