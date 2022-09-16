@@ -51,20 +51,13 @@ function parseInfoInNumbers(info : string, pxSize : any, title : any) {
         let pxDiameter = Math.sqrt((Math.pow(pxSize.height, 2) + Math.pow(pxSize.width, 2)));
         
         let alpha = Math.asin(pxSize.height / pxDiameter);
-        // let beta = 90 - alpha;
 
         let cmHeight = cmDiameter[0] * Math.sin(alpha);
         let cmWidth = Math.sqrt((- Math.pow(cmHeight, 2) + Math.pow(cmDiameter[0], 2)));
 
         return returnInfo(`${String(cmHeight).replace('.', ',')} ${String(cmWidth).replace('.', ',')} cm`);
-    // } else if (info.includes("Maße mit Rahmen:")) {
-    //     console.log(title);
-    //     console.log(JSON.stringify(pxSize));
-        
-    //     console.log(info);
-    //     console.log("=============");
-    //     console.log();
-    //     return returnInfo(info);
+    } else if (info.includes("Maße mit Rahmen:")) {
+        return returnInfo(info.split('Maße mit Rahmen:')[1]);
     } else {
         return returnInfo(info);
     }
