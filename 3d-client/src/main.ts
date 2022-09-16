@@ -11,6 +11,11 @@ import * as THREE from 'three';
 
 const images = await fetchImages().then(data => {return data});
 
+// Possiont of last Group Background
+let LASTPOSX : number;
+let YEAR = 0;
+
+
 console.log(images);
 
 
@@ -62,24 +67,58 @@ function windowResize() {
 /* =======================================
 generate canvas
 ======================================= */
-let labelRenderer: any;
 
-generate(images);
+generateGallery(images);
 
-function generate(data: any) {
 
+function generateGallery(data: any) {
   let positionX = -10;
+  let positionY = 10;
   let positionZ = 10;
-  let year = 0;
-
+  
   data.forEach((elm: any) => {
+    generatePlane(elm, positionX, positionY, positionZ);
+    
+    // Calc Positon for next entrey
+    positionX += CONFIG.maxHightWidthCube;
+    positionZ -= CONFIG.maxHightWidthCube;
+  });
+}
 
+async function generateReference(ids: any, position: any) {
+  const data = await fetchImages(ids).then(data => {return data});
+
+  let positionX = position.x - CONFIG.maxHightWidthCube;
+  let positionY = 40;
+  let positionZ = position.z + CONFIG.maxHightWidthCube;
+  
+  data.forEach((elm: any) => {
+    generatePlane(elm, positionX, positionY, positionZ, false, true);
+    
+    // Calc Positon for next entrey
+    positionX += CONFIG.maxHightWidthCube;
+    positionZ -= CONFIG.maxHightWidthCube;
+  });
+}
+
+function destroyReferences() {
+  let references = scene.children.filter(elm => {
+    if (elm.constructor.name === 'Group' && elm.children[0].userData.destroyable) 
+      return elm
+  });
+
+  references.forEach((ref: any) => {
+    scene.remove(ref);
+  });
+}
+
+function generatePlane(image : any, positionX : any, positionY : any, positionZ : any, timeBeam : boolean = true, destroyable : boolean = false) {
     // set year
     const regex = /[+-]?\d+(\,\d+)?/g;
-    const imgDate = String(elm.date).match(regex)!.map(function(v : string) { return Math.abs(parseInt(v)); }).slice(0, 1);
+    const imgDate = String(image.date).match(regex)!.map(function(v : string) { return Math.abs(parseInt(v)); }).slice(0, 1);
 
     // Sanatize Proxy Img String
-    let imgProxy = elm.preview.replace('imageserver-2022', 'data-proxy/image.php?subpath=');
+    let imgProxy = image.preview.replace('imageserver-2022', 'data-proxy/image.php?subpath=');
     let cubeColor = 0xFFFFFF;
 
     // Set Texture
@@ -104,7 +143,7 @@ function generate(data: any) {
       })
     ];
 
-    let boxSize = calcSize(elm.size);
+    let boxSize = calcSize(image.size);
 
     // Generate Painting
     // BoxGeometry expects width, height, depht
@@ -112,49 +151,55 @@ function generate(data: any) {
     const painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
 
     // Generate Background
-    const backgroundMaterial = new THREE.MeshBasicMaterial({ map: loader.load('../assets/stone-bg.jpg') });
+    let backgroundMaterial = new THREE.MeshBasicMaterial({ map: loader.load('../assets/stone-bg.jpg')});
+    if (image.references.length > 0 && timeBeam)
+      backgroundMaterial = new THREE.MeshBasicMaterial({ map: loader.load('../assets/stone-bg.jpg'), color: 0x95a5a6 })
     const backgroundGeometry = new THREE.BoxGeometry(CONFIG.maxHightWidthCube, CONFIG.maxHightWidthCube * 1.25, CONFIG.canvasDepth * 4);
     const background = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
 
     // Map Data to Element
-    painting.userData = elm;
+    painting.userData = image;
+    painting.userData.destroyable = destroyable;
+
+    if (timeBeam && image.references.length > 0)
+      painting.userData.allowReference = true;
+    else
+      painting.userData.allowReference = false;
 
     // Set Paitning
     painting.rotation.y += 0.25;
-    painting.position.y = 10;
+    painting.position.y = positionY;
 
     painting.position.x = positionX + CONFIG.maxHightWidthCube;
     painting.position.z = positionZ - CONFIG.maxHightWidthCube;
 
-
     // Set Backgournd
     background.rotation.y += 0.25;
-    background.position.y = 10;
+    background.position.y = positionY;
 
     background.position.x = (positionX + CONFIG.maxHightWidthCube);
     background.position.z = (positionZ - CONFIG.maxHightWidthCube) - CONFIG.canvasDepth * 2;
 
-    // Calc Positon for next entrey
-    positionX += CONFIG.maxHightWidthCube;
-    positionZ -= CONFIG.maxHightWidthCube;
-
+    if (timeBeam) {
+      // set posion for last background
+      LASTPOSX = background.position.x;
+    }
+    
     const imgGroup = new THREE.Group();
     imgGroup.add( painting );
     imgGroup.add( background );
-
+    
     // Add Year if counter goes up
-    if (imgDate[0] > year) {
-      year = imgDate[0];
+    if (imgDate[0] > YEAR) {
+      YEAR = imgDate[0];
 
       // Add Year Label
-      let label = createYearLabel(`${year}`, { fontsize: 25 });
+      let label = createYearLabel(`${YEAR}`, { fontsize: 25 });
       label.position.set(positionX + 12, -5, positionZ + 2);
       scene.add(label);
     }
 
     scene.add(imgGroup);
-  });
-
 }
 
 /* =======================================
@@ -162,12 +207,17 @@ scroll animation
 ======================================= */
 document.body.onwheel = moveCamera;
 
+camera.position.x = 13;
+camera.position.z = 12;
+
 function moveCamera(event: any) {
   let scrollX = event.deltaY * -0.1;
   let scrollZ = event.deltaY * 0.1;
 
-  camera.position.x += scrollX;
-  camera.position.z += scrollZ;
+  if (camera.position.x + scrollX > 0 && camera.position.x + scrollX < LASTPOSX+10) {
+    camera.position.x += scrollX;
+    camera.position.z += scrollZ;
+  }
 }
 
 /* =======================================
@@ -249,6 +299,8 @@ function imgHover() {
           <p><b>Artist: </b>${imgData.artist}</p>
           <p><b>Owner: </b>${imgData.owner}</p>
           <p><b>Kind: </b>${imgData.kind.replace(/\s\[.*?\]/g, '').replace(/\s\(.*?\)/g, '')}</p>
+          <hr/>
+          <p><i><b>Right click</b> on an image reveals it in the digital archive</i></p>
         </div>
       `
 		}
@@ -265,4 +317,76 @@ function imgHover() {
 	
 		INTERSECTED = null;
 	}
+}
+
+/* =======================================
+on left click references
+======================================= */
+document.addEventListener( 'click', onDocumentLeftClick, false );
+
+function onDocumentLeftClick(event: any) {
+	// find intersections
+  let img = scene.children.filter(elm => {
+    if (elm.constructor.name === 'Group') 
+      return elm
+  });
+  
+  let intersects = raycaster.intersectObjects(img);
+  let hasReference = false;
+  let isDestroyable = false;
+
+  if (!(Object.keys(intersects).length === 0) && intersects.length > 0) {
+    hasReference = intersects[0].object.parent?.children[0].userData.allowReference;
+    isDestroyable = intersects[0].object.parent?.children[0].userData.destroyable;
+
+    if (isDestroyable)
+      return;
+  }
+  
+  if (intersects.length == 0 && !hasReference && isDestroyable) {
+    destroyReferences();
+    camera.position.y = 10;
+  } else if ( !(Object.keys(intersects).length === 0) && intersects[0].object.parent?.children[0].userData.references.length > 0 && hasReference && !isDestroyable) {
+    destroyReferences();
+    
+    let references = intersects[0].object.parent?.children[0].userData.references;
+    let referencesIds = '';
+
+    references.forEach((ref: any, i : number) => {
+      referencesIds += ref.inventoryNumber;
+
+      if (i < references.length - 1)
+        referencesIds += '&';
+    });
+
+    camera.position.y = 40;
+    generateReference(referencesIds, intersects[0].object.parent?.children[0].position);    
+  } else {
+    destroyReferences();
+    camera.position.y = 10;
+  }
+}
+
+/* =======================================
+on right click references
+======================================= */
+document.addEventListener( 'contextmenu', onDocumentRightClick, false );
+
+function onDocumentRightClick(event: any) {
+  // Prevent the browser's context menu from appearing
+  if(event.preventDefault != undefined)
+    event.preventDefault();
+  if(event.stopPropagation != undefined)
+    event.stopPropagation();
+
+	// find intersections
+  let img = scene.children.filter(elm => {
+    if (elm.constructor.name === 'Group') 
+      return elm
+  });
+  
+  let intersects = raycaster.intersectObjects(img);
+
+  if (!(Object.keys(intersects).length === 0) && intersects.length > 0)
+    window.open(`${CONFIG.cranachURL}${intersects[0].object.parent?.children[0].userData.inventoryNumber}`, '_blank')?.focus();
 }

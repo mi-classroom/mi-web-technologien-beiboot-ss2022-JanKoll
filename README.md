@@ -33,3 +33,4 @@ Die Anwendung kann unter http://beiboot.jankoll.de erreicht werden (redirect auf
 | Basisfunktionen (#1) | 2h       |
 | Review Process  (#2) | 0h       |
 | 3D Zeitstrahl   (#3) | 15h      |
+| Relationen      (#4) | 5h       |

@@ -1,5 +1,7 @@
 {
-    "fetchURL": "http://127.0.0.1:3001",
+    "fetchURL": "http://127.0.0.1:3001/bestof/",
+    "searchURL": "http://127.0.0.1:3001/find/",
+    "cranachURL": "https://lucascranach.org/de/",
     "maxHightWidthCm": 400,
     "maxHightWidthCube": 20,
     "canvasDepth": 0.25
