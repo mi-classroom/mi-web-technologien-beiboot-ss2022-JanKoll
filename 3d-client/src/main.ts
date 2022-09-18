@@ -13,7 +13,10 @@ const images = await fetchImages().then(data => {return data});
 
 // Possiont of last Group Background
 let LASTPOSX : number;
-let YEAR = 0;
+let YEAR : any = [];
+
+const bottomSpace = 64;
+let innerHeight = window.innerHeight - bottomSpace;
 
 
 console.log(images);
@@ -24,6 +27,7 @@ basic three.js setup
 ======================================= */
 const app = document.querySelector<HTMLDivElement>('#app')!
 const appInfo = document.querySelector<HTMLDivElement>('#info')!
+const HTMLcurrentYear = document.querySelector<HTMLDivElement>('#current-year')!
 
 app.innerHTML = `
   <canvas id="tour"></canvas>
@@ -31,7 +35,7 @@ app.innerHTML = `
 
 const scene = new THREE.Scene();
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / innerHeight, 0.1, 1000);
 
 const loader = new THREE.TextureLoader();
 
@@ -42,7 +46,7 @@ const renderer = new THREE.WebGLRenderer({
 scene.background = new THREE.Color( 0x111111 );
 
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth, innerHeight);
 camera.position.setX(5);
 camera.position.setY(10);
 camera.position.setZ(20);
@@ -58,10 +62,10 @@ window resize
 window.addEventListener('resize', windowResize, false);
 
 function windowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.aspect = window.innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(window.innerWidth, innerHeight);
 }
 
 /* =======================================
@@ -115,7 +119,7 @@ function destroyReferences() {
 function generatePlane(image : any, positionX : any, positionY : any, positionZ : any, timeBeam : boolean = true, destroyable : boolean = false) {
     // set year
     const regex = /[+-]?\d+(\,\d+)?/g;
-    const imgDate = String(image.date).match(regex)!.map(function(v : string) { return Math.abs(parseInt(v)); }).slice(0, 1);
+    const imgDate = String(image.date).match(regex)!.map(function(v : string) { return Math.abs(parseInt(v)); }).slice(0, 1);    
 
     // Sanatize Proxy Img String
     let imgProxy = image.preview.replace('imageserver-2022', 'data-proxy/image.php?subpath=');
@@ -188,13 +192,16 @@ function generatePlane(image : any, positionX : any, positionY : any, positionZ 
     const imgGroup = new THREE.Group();
     imgGroup.add( painting );
     imgGroup.add( background );
+
+    // console.log(YEAR[YEAR.length-1].year);
+
     
     // Add Year if counter goes up
-    if (imgDate[0] > YEAR) {
-      YEAR = imgDate[0];
+    if (YEAR.length == 0 || imgDate[0] > YEAR[YEAR.length-1].year) {
+      YEAR.push({year: imgDate[0], position: {x: background.position.x, y: background.position.y, z: background.position.z}});
 
       // Add Year Label
-      let label = createYearLabel(`${YEAR}`, { fontsize: 25 });
+      let label = createYearLabel(`${imgDate[0]-1}`, { fontsize: 25 });
       label.position.set(positionX + 12, -5, positionZ + 2);
       scene.add(label);
     }
@@ -223,19 +230,19 @@ function moveCamera(event: any) {
   }
 }
 
-let slider = document.getElementById("yearslider");
-console.log(document.getElementById("yearslider")?.max);
-
 // // Update the current slider value (each time you drag the slider handle)
+let slider = document.getElementById("yearslider");
 slider?.addEventListener("input", moveSlider);
 
 function moveSlider(this : any) {
   if (slider != undefined) {
     slider.max = LASTPOSX*10 - 100;
   }
-
+  
   camera.position.x = cameraZStart + this.value * 0.1;
   camera.position.z = cameraZStart + (this.value * -0.1);
+  
+  setCurrentYear();
 }
 
 function updateSliderMarker(value : number) {
@@ -243,11 +250,36 @@ function updateSliderMarker(value : number) {
     slider.max = LASTPOSX * 10 - 100;
     slider.value = value * 10;
   }
+  setCurrentYear();
+
 }
 
 function updateCameraScrollPosition(X : number, Z : number) {
   camera.position.x = X;
   camera.position.z = Z;
+}
+
+let lastXPositon = 0;
+let currentYear = YEAR[0];
+HTMLcurrentYear.innerHTML = `${currentYear.year}`;
+
+function setCurrentYear() {
+  if (camera.position.x > lastXPositon) {
+    lastXPositon = camera.position.x;
+
+    if (currentYear.position.x < camera.position.x && currentYear.year < YEAR[YEAR.length-1].year) {
+      currentYear = YEAR[YEAR.indexOf(currentYear) + 1];
+    }
+  } else {
+    lastXPositon = camera.position.x;
+
+    if (currentYear.position.x > camera.position.x) {
+      currentYear = YEAR[YEAR.indexOf(currentYear) - 1];
+    }
+  }
+
+  // drwar year
+  HTMLcurrentYear.innerHTML = `${currentYear.year}`;
 }
 
 
@@ -276,10 +308,13 @@ function onDocumentMouseMove(event: any) {
 	// event.preventDefault();
 	
 	// update the mouse letiable
-	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-  imgHover();
+  if (event.clientY < window.innerHeight - bottomSpace) {
+    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    imgHover();
+  } else {
+    imgHover(false)
+  }
 }
 
 /* =======================================
@@ -287,7 +322,7 @@ image rotation
 ======================================= */
 let INTERSECTED: any, LASTINTERSECTED: any;
 
-function imgHover() {
+function imgHover(inRange : boolean = true) {
 	// find intersections
   let img = scene.children.filter(elm => {
     if (elm.constructor.name === 'Group') 
@@ -302,7 +337,7 @@ function imgHover() {
   raycaster.setFromCamera(mouse, camera);
 
 	// if there is one (or more) intersections
-	if (intersects.length > 0) {
+	if (intersects.length > 0 && inRange) {
 
 		// if the closest object intersected is not the currently stored intersection object
 		if (intersects[0].object != INTERSECTED) {
@@ -356,6 +391,10 @@ on left click references
 document.addEventListener( 'click', onDocumentLeftClick, false );
 
 function onDocumentLeftClick(event: any) {
+
+  if (event.clientY > window.innerHeight - bottomSpace)
+    return;
+
 	// find intersections
   let img = scene.children.filter(elm => {
     if (elm.constructor.name === 'Group') 
@@ -404,6 +443,10 @@ on right click references
 document.addEventListener( 'contextmenu', onDocumentRightClick, false );
 
 function onDocumentRightClick(event: any) {
+
+  if (event.clientY > window.innerHeight - bottomSpace)
+    return;
+
   // Prevent the browser's context menu from appearing
   if(event.preventDefault != undefined)
     event.preventDefault();
