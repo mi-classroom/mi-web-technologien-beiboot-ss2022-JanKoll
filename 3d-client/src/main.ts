@@ -427,7 +427,13 @@ on left click references
 document.addEventListener( 'click', onDocumentLeftClick, false );
 
 function onDocumentLeftClick(event: any) {
-
+  let cameraPos = {
+    "x": camera.position.x,
+    "y": camera.position.y,
+    "z": camera.position.z
+  }
+  
+  // camera.position;
   if (event.clientY > window.innerHeight - bottomSpace)
     return;
 
@@ -450,7 +456,9 @@ function onDocumentLeftClick(event: any) {
   
   if (intersects.length == 0 && !hasReference) {
     destroyReferences();
-    camera.position.y = 10;
+
+    cameraPos.y = 10;
+    smoothCameraMovement(cameraPos);
   } else if ( !(Object.keys(intersects).length === 0) && intersects[0].object.parent?.children[0].userData.references.length > 0 && hasReference) {
     destroyReferences();
     
@@ -464,8 +472,19 @@ function onDocumentLeftClick(event: any) {
         referencesIds += '&';
     });
 
-    camera.position.y = 40;
+    cameraPos.y = 40;
+    smoothCameraMovement(cameraPos);
+
     generateReference(referencesIds, intersects[0].object.parent?.children[0].position);    
+  } else {
+    if (intersects[0].object.isObject3D) {
+      let cameraTarget = {
+        "x": intersects[0].object.position.x + 3,
+        "y": intersects[0].object.position.y,
+        "z": intersects[0].object.position.z + 22.5
+      }
+      smoothCameraMovement(cameraTarget);
+    } 
   }
 }
 
@@ -495,4 +514,52 @@ function onDocumentRightClick(event: any) {
 
   if (!(Object.keys(intersects).length === 0) && intersects.length > 0)
     window.open(`${CONFIG.cranachURL}${intersects[0].object.parent?.children[0].userData.inventoryNumber}`, '_blank')?.focus();
+}
+
+/* =======================================
+smooth camera movement
+======================================= */
+
+function smoothCameraMovement(target: any, duration: number = 100) {
+  let difX = calcPositionDiverence(camera.position.x, target.x);
+  let difY = calcPositionDiverence(camera.position.y, target.y);
+  let difZ = calcPositionDiverence(camera.position.z, target.z);
+
+  let stepsX = difX.val / duration;
+  let stepsY = difY.val / duration;
+  let stepsZ = difZ.val / duration;
+
+  for(let i = 0; i <= duration; i++) {
+    setTimeout(() => {
+      if (i != duration) {
+      if (difX.bigger)
+        camera.position.x += stepsX;
+      else
+        camera.position.x -= stepsX;
+
+      if (difY.bigger)
+        camera.position.y += stepsY;
+      else
+        camera.position.y -= stepsY;
+
+      if (difZ.bigger)
+        camera.position.z += stepsZ;
+      else
+        camera.position.z -= stepsZ;
+      } else {
+        camera.position.x = target.x;
+        camera.position.y = target.y;
+        camera.position.z = target.z;
+      }
+      updateSliderMarker(camera.position.x);
+    }, i);
+  }
+}
+
+function calcPositionDiverence(a: any, b: any) {
+  if (a > b) {
+    return {"val": a - b, "bigger": false};
+  } else {
+    return {"val": b - a, "bigger": true};
+  }
 }
