@@ -10,11 +10,18 @@
     <div id="app"></div>
     <div id="info"></div>
     <footer>
-      <div class="slidecontainer">
-        <input type="range" min="1" max="100" value="1" class="slider" id="yearslider">
+      <span id="current-year"></span>
+      <div class="year-slidecontainer">
+        <input type="range" min="0" max="100" value="0" class="year-slider" id="yearslider">
+      </div>
+
+      <span class="zoom-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 23.85 23.85"><defs><style>.cls-1{fill:#fff;}</style></defs><path class="cls-1" d="M23.85,22.83l-7.43-7.43c1.4-1.63,2.25-3.75,2.25-6.07C18.67,4.18,14.49,0,9.34,0S0,4.18,0,9.34s4.18,9.34,9.34,9.34c2.32,0,4.44-.85,6.07-2.25l7.43,7.43,1.02-1.02Zm-14.51-5.6c-4.36,0-7.9-3.54-7.9-7.9S4.98,1.44,9.34,1.44s7.9,3.54,7.9,7.9-3.54,7.9-7.9,7.9Z"/><rect class="cls-1" x="3.75" y="8.62" width="11.17" height="1.44" transform="translate(-3.87 9.34) rotate(-45)"/><polygon class="cls-1" points="8.8 5.74 7.18 5.74 7.18 4.31 5.74 4.31 5.74 5.74 4.13 5.74 4.13 7.18 5.74 7.18 5.74 8.62 7.18 8.62 7.18 7.18 8.8 7.18 8.8 5.74"/><rect class="cls-1" x="9.87" y="11.49" width="4.67" height="1.44"/></svg>
+      </span>
+      <div class="zoom-slidecontainer">
+        <input type="range" min="10" max="25" value="10" class="zoom-slider" id="zoomslider">
       </div>
       
-      <span id="current-year"></span>
     </footer>
     <script type="module" src="/src/main.ts"></script>
   </body>

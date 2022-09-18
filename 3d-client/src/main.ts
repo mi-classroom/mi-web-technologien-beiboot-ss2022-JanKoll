@@ -231,27 +231,26 @@ function moveCamera(event: any) {
 }
 
 // // Update the current slider value (each time you drag the slider handle)
-let slider = document.getElementById("yearslider");
-slider?.addEventListener("input", moveSlider);
+let yearSlider = document.getElementById("yearslider");
+yearSlider?.addEventListener("input", moveSlider);
 
 function moveSlider(this : any) {
-  if (slider != undefined) {
-    slider.max = LASTPOSX*10 - 100;
+  if (yearSlider != undefined) {
+    yearSlider.max = LASTPOSX*10 - 100;
   }
   
-  camera.position.x = cameraZStart + this.value * 0.1;
+  camera.position.x = cameraXStart + this.value * 0.1;
   camera.position.z = cameraZStart + (this.value * -0.1);
   
   setCurrentYear();
 }
 
 function updateSliderMarker(value : number) {
-  if (slider != undefined) {
-    slider.max = LASTPOSX * 10 - 100;
-    slider.value = value * 10;
+  if (yearSlider != undefined) {
+    yearSlider.max = LASTPOSX * 10 - 100;
+    yearSlider.value = value * 10;
   }
   setCurrentYear();
-
 }
 
 function updateCameraScrollPosition(X : number, Z : number) {
@@ -273,7 +272,7 @@ function setCurrentYear() {
   } else {
     lastXPositon = camera.position.x;
 
-    if (currentYear.position.x > camera.position.x) {
+    if (currentYear.position.x > camera.position.x && YEAR.indexOf(currentYear) > 0) {
       currentYear = YEAR[YEAR.indexOf(currentYear) - 1];
     }
   }
@@ -281,6 +280,27 @@ function setCurrentYear() {
   // drwar year
   HTMLcurrentYear.innerHTML = `${currentYear.year}`;
 }
+
+/* =======================================
+zoom animation
+======================================= */
+let zoomSlider = document.getElementById("zoomslider");
+zoomSlider?.addEventListener("input", zoom);
+let lastZoomPosition = 10;
+
+function zoom(this : any) {
+  if (zoomSlider != undefined) {
+    if (zoomSlider.value > lastZoomPosition) {
+      camera.zoom = zoomSlider.value * .1;
+    } else {
+      camera.zoom = zoomSlider.value * .1;
+    }
+    lastZoomPosition = zoomSlider.value;
+  }
+  
+  camera.updateProjectionMatrix();
+}
+
 
 
 /* =======================================
