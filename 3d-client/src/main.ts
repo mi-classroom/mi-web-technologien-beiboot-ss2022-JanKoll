@@ -155,34 +155,47 @@ function generatePlane(image : any, positionX : any, positionY : any, positionZ 
     const painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
 
     // Generate Background
-    let backgroundMaterial = new THREE.MeshBasicMaterial({ map: loader.load('../assets/stone-bg.jpg')});
-    if (image.references.length > 0 && timeBeam)
-      backgroundMaterial = new THREE.MeshBasicMaterial({ map: loader.load('../assets/stone-bg.jpg'), color: 0x95a5a6 })
+    let backgroundMaterial = new THREE.MeshBasicMaterial({ map: loader.load('../assets/stone-bg.jpg'), color: 0x666666 });
+    if (destroyable)
+      backgroundMaterial = new THREE.MeshBasicMaterial({ map: loader.load('../assets/stone-bg.jpg'), color: 0x806600 })
+    let testMaterial = new THREE.MeshBasicMaterial({ map: loader.load('../assets/stone-bg.jpg'), color: 0xffcc00 })
     const backgroundGeometry = new THREE.BoxGeometry(CONFIG.maxHightWidthCube, CONFIG.maxHightWidthCube * 1.25, CONFIG.canvasDepth * 4);
     const background = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
+    
+    const referenceGeometry = new THREE.SphereGeometry(1, 32, 16);
+    const reference = new THREE.Mesh(referenceGeometry, testMaterial);
+
+    reference.userData.allowReference = true;
+
 
     // Map Data to Element
     painting.userData = image;
     painting.userData.destroyable = destroyable;
 
-    if (timeBeam && image.references.length > 0)
-      painting.userData.allowReference = true;
-    else
-      painting.userData.allowReference = false;
+    // if (timeBeam && image.references.length > 0)
+    //   painting.userData.allowReference = true;
+    // else
+    //   painting.userData.allowReference = false;
 
     // Set Paitning
+    painting.position.x = positionX + CONFIG.maxHightWidthCube;
     painting.rotation.y += 0.25;
     painting.position.y = positionY;
-
-    painting.position.x = positionX + CONFIG.maxHightWidthCube;
     painting.position.z = positionZ - CONFIG.maxHightWidthCube;
 
     // Set Backgournd
+    background.position.x = (positionX + CONFIG.maxHightWidthCube);
     background.rotation.y += 0.25;
     background.position.y = positionY;
-
-    background.position.x = (positionX + CONFIG.maxHightWidthCube);
     background.position.z = (positionZ - CONFIG.maxHightWidthCube) - CONFIG.canvasDepth * 2;
+
+    // Set Reference
+    reference.position.y = positionY + 10;
+    // reference.rotation.y += 0.25;
+    reference.position.x = (positionX + CONFIG.maxHightWidthCube + 7.5);
+    reference.position.z = (positionZ - CONFIG.maxHightWidthCube) - CONFIG.canvasDepth * 2;
+
+    // console.log(reference.position);
 
     if (timeBeam) {
       // set posion for last background
@@ -192,6 +205,9 @@ function generatePlane(image : any, positionX : any, positionY : any, positionZ 
     const imgGroup = new THREE.Group();
     imgGroup.add( painting );
     imgGroup.add( background );
+
+    if (timeBeam && image.references.length > 0)
+      imgGroup.add( reference );
 
     // console.log(YEAR[YEAR.length-1].year);
 
@@ -423,20 +439,19 @@ function onDocumentLeftClick(event: any) {
   
   let intersects = raycaster.intersectObjects(img);
   let hasReference = false;
-  let isDestroyable = false;
 
   if (!(Object.keys(intersects).length === 0) && intersects.length > 0) {
-    hasReference = intersects[0].object.parent?.children[0].userData.allowReference;
-    isDestroyable = intersects[0].object.parent?.children[0].userData.destroyable;
-
-    if (isDestroyable)
-      return;
+    intersects.forEach((elm: any) => {
+      if (elm.object.userData.allowReference) {
+        hasReference = true;
+      }
+    });
   }
   
-  if (intersects.length == 0 && !hasReference && isDestroyable) {
+  if (intersects.length == 0 && !hasReference) {
     destroyReferences();
     camera.position.y = 10;
-  } else if ( !(Object.keys(intersects).length === 0) && intersects[0].object.parent?.children[0].userData.references.length > 0 && hasReference && !isDestroyable) {
+  } else if ( !(Object.keys(intersects).length === 0) && intersects[0].object.parent?.children[0].userData.references.length > 0 && hasReference) {
     destroyReferences();
     
     let references = intersects[0].object.parent?.children[0].userData.references;
@@ -451,9 +466,6 @@ function onDocumentLeftClick(event: any) {
 
     camera.position.y = 40;
     generateReference(referencesIds, intersects[0].object.parent?.children[0].position);    
-  } else {
-    destroyReferences();
-    camera.position.y = 10;
   }
 }
 
