@@ -8,9 +8,9 @@ Als organisatorischen Rahmen für das Projekt nutzen wir GitHub Classroom. Inhal
 
 - Auf dem Gerät muss Docker-Compose installiert sein.
 - In den `backend/data` Ordner muss die `cda-paintings-2022-04-22.de.json` gelegt werden.
-- Wenn **nicht** lokal gearbeitet wird, müssen die *env* in
+<!-- - Wenn **nicht** lokal gearbeitet wird, müssen die *env* in
     - `client/src/env.js` und
-    - `server/.env` angepasst werden
+    - `server/.env` angepasst werden -->
 
 Um das Projekt auszuführen, muss folgender Befehl im `root` Verzeichnis eingegeben werden:
 ```bash
@@ -20,11 +20,11 @@ docker-compose up
 Damit Codeänderungen vorgenommen werden, 
 muss folgender Befehl im `root` Verzeichnis eingegeben werden:
 ```bash
-docker-compose up --build -d
+docker-compose up --build
 ```
 
 ## Projekt im Web
-Die Anwendung kann unter http://beiboot.jankoll.de erreicht werden (redirect auf V-Host).
+Die Anwendung kann unter https://beiboot.jankoll.online erreicht werden.
 
 ## Zeitaufwand
 
@@ -34,3 +34,10 @@ Die Anwendung kann unter http://beiboot.jankoll.de erreicht werden (redirect auf
 | Review Process  (#2) | 0h       |
 | 3D Zeitstrahl   (#3) | 15h      |
 | Relationen      (#4) | 5h       |
+| Explore more    (#5) | 7h       |
+
+> Features für #5
+> - Timeline
+> - Zoom
+> - Animations (+scrool to image)
+> - Legende

@@ -164,15 +164,9 @@ function generatePlane(image : any, positionX : any, positionY : any, positionZ 
 
     reference.userData.allowReference = true;
 
-
     // Map Data to Element
     painting.userData = image;
     painting.userData.destroyable = destroyable;
-
-    // if (timeBeam && image.references.length > 0)
-    //   painting.userData.allowReference = true;
-    // else
-    //   painting.userData.allowReference = false;
 
     // Set Paitning
     painting.position.x = positionX + CONFIG.maxHightWidthCube;
@@ -188,11 +182,8 @@ function generatePlane(image : any, positionX : any, positionY : any, positionZ 
 
     // Set Reference
     reference.position.y = positionY + 10;
-    // reference.rotation.y += 0.25;
     reference.position.x = (positionX + CONFIG.maxHightWidthCube + 7.5);
     reference.position.z = (positionZ - CONFIG.maxHightWidthCube) - CONFIG.canvasDepth * 2;
-
-    // console.log(reference.position);
 
     if (timeBeam) {
       // set posion for last background
@@ -206,9 +197,6 @@ function generatePlane(image : any, positionX : any, positionY : any, positionZ 
     if (timeBeam && image.references.length > 0)
       imgGroup.add( reference );
 
-    // console.log(YEAR[YEAR.length-1].year);
-
-    
     // Add Year if counter goes up
     if (YEAR.length == 0 || imgDate[0] > YEAR[YEAR.length-1].year) {
       YEAR.push({year: imgDate[0], position: {x: background.position.x, y: background.position.y, z: background.position.z}});
@@ -314,18 +302,6 @@ function zoom(this : any) {
   camera.updateProjectionMatrix();
 }
 
-
-
-/* =======================================
-animation loop
-======================================= */
-animate();
-
-function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-}
-
 /* =======================================
 mouse over
 ======================================= */
@@ -363,8 +339,6 @@ function imgHover(inRange : boolean = true) {
   });
   
   let intersects = raycaster.intersectObjects(img);
-  
-  // intersects = intersects.map(elm => elm.splice(-1, 1))
 
 	// create a Ray with origin at the mouse position
   raycaster.setFromCamera(mouse, camera);
@@ -559,4 +533,14 @@ function calcPositionDiverence(a: any, b: any) {
   } else {
     return {"val": b - a, "bigger": true};
   }
+}
+
+/* =======================================
+animation loop
+======================================= */
+animate();
+
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
 }
