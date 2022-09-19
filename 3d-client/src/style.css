@@ -18,6 +18,10 @@ $darken-strong: rgba(0, 0, 0, 0.6);
 $darken-strongest: rgba(0, 0, 0, 0.8);
 */
 
+body {
+  background: #444;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -45,21 +49,128 @@ canvas {
 }
 
 #info div {
-  color: #444;
-  background: #f2f2f2;
-  position: absolute;
   right: 0;
-  bottom: 1rem;
+  max-width: 40rem;
+}
+
+.legende {
+  color: #fff;
+  font-size: 1.5rem;
+  height: 2rem;
+  width: 2rem;
+  text-align: center;
+  display: block;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  position: fixed;
+  bottom: .75rem;
+  left: 1rem;
+  line-height: 2rem;
+}
+
+.legende:hover {
+  cursor: pointer;
+}
+
+.legende:hover .legende-text {
+  display: block;
+}
+
+.legende-text {
+  left: 0;
+  max-width: 30rem;
+  text-align: left;
+  display: none;
+  line-height: normal;
+  /* opacity: .25; */
+}
+
+#info div, .legende-text {
+  color: #f2f2f2;
+  background: #444;
+  position: fixed;
+  bottom: 5rem;
   font-family: IBMPlex;
   padding: 1rem .5rem;
-  max-width: 40rem;
   width: 100%;
+  font-size: 1rem;
 }
 
-#info div h2 {
+#info div h2, .legende-text h2 {
   margin-bottom: .5rem;
+  color: #fc0;
 }
 
-#info div p:not(:last-child) {
+#info div p:not(:last-child), .legende-text p:not(:last-child) {
   margin-bottom: .25rem;
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.year-slidecontainer {
+  /* width: 100%; Width of the outside container */
+  position: absolute;
+  bottom: 1.25rem;
+  left: 8rem;
+  right: 20rem;
+}
+
+.zoom-slidecontainer {
+  /* width: 100%; Width of the outside container */
+  position: absolute;
+  bottom: 1.25rem;
+  width: 15rem;
+  right: 1rem;
+}
+
+.year-slider, .zoom-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: .75rem;
+  background: #b4b4b4;
+  outline: none;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  position: relative;
+}
+
+.year-slider::-webkit-slider-thumb, .zoom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: #fc0;
+  cursor: pointer;
+}
+
+.year-slider::-moz-range-thumb, .zoom-slider::-moz-range-thumb {
+  width: 1.5rem;
+  height: 1.5rem;
+  background: #fc0;
+  cursor: pointer;
+}
+
+#current-year {
+  position: absolute;
+  left: 4rem;
+  bottom: 1rem;
+  color: #f2f2f2;
+  font-size: 1.5rem;
+}
+
+.zoom-icon {
+  fill: #fff;
+  position: absolute;
+  right: 16.5rem;
+  bottom: .75rem;
+}
+
+.zoom-icon svg {
+  height: 1.75rem;
+  width: 1.75rem;
 }
