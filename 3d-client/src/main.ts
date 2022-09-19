@@ -19,9 +19,6 @@ const bottomSpace = 64;
 let innerHeight = window.innerHeight - bottomSpace;
 
 
-console.log(images);
-
-
 /* =======================================
 basic three.js setup
 ======================================= */
@@ -62,10 +59,10 @@ window resize
 window.addEventListener('resize', windowResize, false);
 
 function windowResize() {
-  camera.aspect = window.innerWidth / innerHeight;
+  camera.aspect = window.innerWidth / (window.innerHeight - bottomSpace);
   camera.updateProjectionMatrix();
   
-  renderer.setSize(window.innerWidth, innerHeight);
+  renderer.setSize(window.innerWidth, window.innerHeight - bottomSpace);
 }
 
 /* =======================================
@@ -402,7 +399,7 @@ function imgHover(inRange : boolean = true) {
           <p><b>Owner: </b>${imgData.owner}</p>
           <p><b>Kind: </b>${imgData.kind.replace(/\s\[.*?\]/g, '').replace(/\s\(.*?\)/g, '')}</p>
           <hr/>
-          <p><i><b>Right click</b> on an image reveals it in the digital archive</i></p>
+          <p><i><b>Rechtsklick</b> auf ein Bild zeigt es im digitalen Archiv an</i></p>
         </div>
       `
 		}

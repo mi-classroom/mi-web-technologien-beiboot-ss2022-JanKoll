@@ -49,23 +49,59 @@ canvas {
 }
 
 #info div {
+  right: 0;
+  max-width: 40rem;
+}
+
+.legende {
+  color: #fff;
+  font-size: 1.5rem;
+  height: 2rem;
+  width: 2rem;
+  text-align: center;
+  display: block;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  position: fixed;
+  bottom: .75rem;
+  left: 1rem;
+  line-height: 2rem;
+}
+
+.legende:hover {
+  cursor: pointer;
+}
+
+.legende:hover .legende-text {
+  display: block;
+}
+
+.legende-text {
+  left: 0;
+  max-width: 30rem;
+  text-align: left;
+  display: none;
+  line-height: normal;
+  /* opacity: .25; */
+}
+
+#info div, .legende-text {
   color: #f2f2f2;
   background: #444;
-  position: absolute;
-  right: 0;
+  position: fixed;
   bottom: 5rem;
   font-family: IBMPlex;
   padding: 1rem .5rem;
-  max-width: 40rem;
   width: 100%;
+  font-size: 1rem;
 }
 
-#info div h2 {
+#info div h2, .legende-text h2 {
   margin-bottom: .5rem;
   color: #fc0;
 }
 
-#info div p:not(:last-child) {
+#info div p:not(:last-child), .legende-text p:not(:last-child) {
   margin-bottom: .25rem;
 }
 
@@ -80,7 +116,7 @@ footer {
   /* width: 100%; Width of the outside container */
   position: absolute;
   bottom: 1.25rem;
-  left: 5rem;
+  left: 8rem;
   right: 20rem;
 }
 
@@ -121,7 +157,7 @@ footer {
 
 #current-year {
   position: absolute;
-  left: 1rem;
+  left: 4rem;
   bottom: 1rem;
   color: #f2f2f2;
   font-size: 1.5rem;
