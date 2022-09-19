@@ -28,36 +28,51 @@ function mapImgData(img: any) {
     return {
         "title":            img.metadata.title,
         "preview":          img.images.overall.images[0].sizes.medium.src,
-        "size":             parseInfoInNumbers(img.metadata.additionalInfos, img.images.overall.images[0].sizes.medium.dimensions),
+        "size":             parseInfoInNumbers(img.dimensions, img.images.overall.images[0].sizes.medium.dimensions, img.metadata.title),
         "kind":             img.medium,
         "owner":            img.repository,
         "artist":           img.involvedPersons[0].name,
         "date":             img.metadata.date,
         "sortingNumber":    img.sortingNumber,
-        "references":       img.references
-
+        "references":       img.references,
+        "inventoryNumber":  img.inventoryNumber
     }    
 }
 
-function parseInfoInNumbers(info : string, pxSize : any) {
-    const regex = /[+-]?\d+(\,\d+)?/g;
-    const cmSize = String(info).match(regex)!.map(function(v : string) { return Math.abs(parseFloat(v.replace(',', '.'))); }).slice(0, 2);
+function parseInfoInNumbers(info : string, pxSize : any, title : any) {
 
-    if (cmSize[0] > cmSize[1] && pxSize.height > pxSize.width) {
+    
+
+    const regex = /[+-]?\d+(\,\d+)?/g;
+
+    if (info.includes("Durchmesser")) {
+        let cmDiameter = String(info).match(regex)!.map(function(v : string) { return Math.abs(parseFloat(v.replace(',', '.'))); }).slice(0, 1);
+
+        let pxDiameter = Math.sqrt((Math.pow(pxSize.height, 2) + Math.pow(pxSize.width, 2)));
+        
+        let alpha = Math.asin(pxSize.height / pxDiameter);
+
+        let cmHeight = cmDiameter[0] * Math.sin(alpha);
+        let cmWidth = Math.sqrt((- Math.pow(cmHeight, 2) + Math.pow(cmDiameter[0], 2)));
+
+        return returnInfo(`${String(cmHeight).replace('.', ',')} ${String(cmWidth).replace('.', ',')} cm`);
+    } else if (info.includes("Maße mit Rahmen:")) {
+        return returnInfo(info.split('Maße mit Rahmen:')[1]);
+    } else {
+        return returnInfo(info);
+    }
+    
+    function returnInfo(infoClean : any) {
+        let cmSize = String(infoClean).match(regex)!.map(function(v : string) { return Math.abs(parseFloat(v.replace(',', '.'))); }).slice(0, 2);
+        
         return {
             "cm":  {"height": cmSize[0],
                     "width": cmSize[1]},
             "px":  {"height": pxSize.height,
                     "width": pxSize.width},
         }
-    } else {
-        return {
-            "cm":  {"height": cmSize[1],
-                    "width": cmSize[0]},
-            "px":  {"height": pxSize.height,
-                    "width": pxSize.width},
-        }
     }
+
 }
 
 function sortByNumber(images: any) {
@@ -70,8 +85,28 @@ function sortByNumber(images: any) {
 
 const router = new Router();
 router
-  .get("/", async (context: any) => {
+  .get("/bestof", async (context: any) => {
     context.response.body = sortedBestData;
+  })
+  .get("/find/:id", async (context: any) => {
+    let found : any = [];
+
+    JSON.parse(data).items.find((img: any) => {
+
+        let ids = context?.params?.id.split('&');
+
+        ids.forEach((id: any) => {
+            if (img.metadata.id.includes(id)) {
+                found.push(mapImgData(img));
+            }
+        });
+    });
+
+    if (found.length > 0) {
+        context.response.body = found;
+    } else {
+        context.response.body = "Not found";
+    }
   })
 
 const app = new Application();
@@ -80,16 +115,3 @@ app.use(router.routes());
 
 console.info("CORS-enabled web server listening on port " + parseInt(config().PORT));
 await app.listen({ port: parseInt(config().PORT) });
-
-
-// import { serve } from "https://deno.land/std@0.138.0/http/server.ts";
-
-// function handler(req: Request): Response {
-//     return new Response(bestData, {headers: {
-//           'Access-Control-Allow-Origin': '*'
-//         }});
-//     // return new Response(document)
-//   }
-
-// // To listen on port 4242.
-// serve(handler, { port: 3000 });
