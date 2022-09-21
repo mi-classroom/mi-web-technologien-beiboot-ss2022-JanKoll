@@ -24,7 +24,7 @@ docker-compose up --build
 ```
 
 ## Projekt im Web
-Die Anwendung kann unter wss://beiboot.jankoll.online erreicht werden.
+Die Anwendung kann unter http://beiboot.jankoll.de erreicht werden.
 
 ## Zeitaufwand
 
