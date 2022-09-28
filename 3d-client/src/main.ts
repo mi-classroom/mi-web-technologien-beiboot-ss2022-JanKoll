@@ -18,7 +18,6 @@ let YEAR : any = [];
 const bottomSpace = 64;
 let innerHeight = window.innerHeight - bottomSpace;
 
-
 /* =======================================
 basic three.js setup
 ======================================= */
@@ -68,9 +67,7 @@ function windowResize() {
 /* =======================================
 generate canvas
 ======================================= */
-
 generateGallery(images);
-
 
 function generateGallery(data: any) {
   let positionX = -10;
@@ -113,7 +110,7 @@ function destroyReferences() {
   });
 }
 
-function generatePlane(image : any, positionX : any, positionY : any, positionZ : any, timeBeam : boolean = true, destroyable : boolean = false) {
+function generatePlane(image : any, positionX : number, positionY : number, positionZ : number, timeBeam : boolean = true, destroyable : boolean = false) {
     // set year
     const regex = /[+-]?\d+(\,\d+)?/g;
     const imgDate = String(image.date).match(regex)!.map(function(v : string) { return Math.abs(parseInt(v)); }).slice(0, 1);    
@@ -168,19 +165,16 @@ function generatePlane(image : any, positionX : any, positionY : any, positionZ 
     painting.userData = image;
     painting.userData.destroyable = destroyable;
 
-    // Set Paitning
     painting.position.x = positionX + CONFIG.maxHightWidthCube;
     painting.rotation.y += 0.25;
     painting.position.y = positionY;
     painting.position.z = positionZ - CONFIG.maxHightWidthCube;
 
-    // Set Backgournd
     background.position.x = (positionX + CONFIG.maxHightWidthCube);
     background.rotation.y += 0.25;
     background.position.y = positionY;
     background.position.z = (positionZ - CONFIG.maxHightWidthCube) - CONFIG.canvasDepth * 2;
 
-    // Set Reference
     reference.position.y = positionY + 10;
     reference.position.x = (positionX + CONFIG.maxHightWidthCube + 7.5);
     reference.position.z = (positionZ - CONFIG.maxHightWidthCube) - CONFIG.canvasDepth * 2;
@@ -385,7 +379,7 @@ function imgHover(inRange : boolean = true) {
       INTERSECTED.children[1].rotation.y = .25;
     }
 
-    // delete info
+    // delete/unset info
     appInfo.innerHTML = ""
 	
 		INTERSECTED = null;
@@ -404,7 +398,6 @@ function onDocumentLeftClick(event: any) {
     "z": camera.position.z
   }
   
-  // camera.position;
   if (event.clientY > window.innerHeight - bottomSpace)
     return;
 
@@ -490,7 +483,6 @@ function onDocumentRightClick(event: any) {
 /* =======================================
 smooth camera movement
 ======================================= */
-
 function smoothCameraMovement(target: any, duration: number = 100) {
   let difX = calcPositionDiverence(camera.position.x, target.x);
   let difY = calcPositionDiverence(camera.position.y, target.y);

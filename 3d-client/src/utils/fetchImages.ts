@@ -1,29 +1,13 @@
 import CONFIG from '../config.json'
 
 export async function fetchImages(search: string = '') {
-    const headers = {
-      'Access-Control-Allow-Origin': '*',
-    }
+  let url = CONFIG.fetchURL;
 
-    if (search === '') {
-      const response = await fetch(CONFIG.fetchURL, {
-        mode: 'cors',
-        headers,
-        method: 'GET'
-      })
-  
-      const data = await response.json()
-    
-      return data;
-    } else {
-      const response = await fetch(CONFIG.searchURL + search, {
-        mode: 'cors',
-        headers,
-        method: 'GET'
-      })
-  
-      const data = await response.json()
-    
-      return data;
-    }
-   }
+  if (search !== '')
+    url = CONFIG.searchURL + search;
+
+  const response = await fetch(url, {mode: 'cors', method: 'GET'})
+    .catch((error) => {console.error(error)});
+
+  return await response.json();
+}
